@@ -5,6 +5,8 @@ import WebAudioRenderer from '@elemaudio/web-renderer';
 const core = new WebAudioRenderer();
 let ctx = new AudioContext();
 
+const OFF = el.const({ value: 0 });
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -13,7 +15,7 @@ let ctx = new AudioContext();
 export class AppComponent implements OnInit {
   title = 'seqTest';
 
-  off = el.const({ value: 0 });
+  isAudioOn = false;
 
   async ngOnInit() {
     core.on('load', () => {
@@ -33,19 +35,25 @@ export class AppComponent implements OnInit {
     node.connect(ctx.destination);
   };
 
-  play() {
+  toggleAudioOnOff() {
     ctx.resume();
-    this.generateSound();
+    if (this.isAudioOn) {
+      this.turnAudioOff();
+    } else {
+      this.generateSound();
+    }
   }
 
-  stop() {
-    core.render(this.off, this.off);
+  turnAudioOff() {
+    core.render(OFF, OFF);
+    this.isAudioOn = false;
   }
 
   generateSound() {
     let leftChannel = el.cycle(440);
     let rightChannel = el.cycle(220);
     core.render(leftChannel, rightChannel);
+    this.isAudioOn = true;
   }
 }
 
