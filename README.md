@@ -1,6 +1,6 @@
 # SoundTest
 
-This is a template for an audio web application powered by Elementary Audio for the sound engine and Angular for the GUI.
+This is a template for creating an audio web application powered by Elementary Audio for the sound engine and Angular for the GUI.
 
 ## Done for you
 
