@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { el } from '@elemaudio/core';
 import WebAudioRenderer from '@elemaudio/web-renderer';
+import { Notes } from './notes/notes';
 
 const core = new WebAudioRenderer();
 let ctx = new AudioContext();
@@ -40,7 +41,7 @@ export class AppComponent implements OnInit {
     if (this.isAudioOn) {
       this.turnAudioOff();
     } else {
-      this.generateSound();
+      this.playSound();
     }
   }
 
@@ -49,9 +50,9 @@ export class AppComponent implements OnInit {
     this.isAudioOn = false;
   }
 
-  generateSound() {
-    let leftChannel = el.cycle(440);
-    let rightChannel = el.cycle(220);
+  playSound() {
+    let leftChannel = Notes.C4;
+    let rightChannel = Notes.C3;
     core.render(leftChannel, rightChannel);
     this.isAudioOn = true;
   }
