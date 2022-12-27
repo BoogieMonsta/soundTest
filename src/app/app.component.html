@@ -1,3 +1,19 @@
 <h1>SoundTest</h1>
 <p>Template for an audio web application powered by Elementary Audio and Angular</p>
-<button (click)="toggleAudioOnOff()">ON/OFF</button>
+<div>
+    Tempo:
+    <input type="number" [(ngModel)]="tempo" (ngModelChange)="refreshTempo()">
+    <button (click)="resetTempo()">reset</button>
+    <button (click)="reduceTempo()">-</button>
+    <button (click)="increaseTempo()">+</button>
+</div>
+<br>
+<button (click)="togglePlayPause()">ON/OFF</button>
+
+<table>
+    <tr *ngFor="let noteName of pianoRoll">
+        <td  *ngFor="let step of pattern">
+            <div (click)="toggleStep(step, noteName)">{{ displayStep(step, noteName) }}</div>
+        </td>
+    </tr>
+</table>
