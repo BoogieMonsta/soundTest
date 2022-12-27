@@ -102,7 +102,7 @@ export class AppComponent implements OnInit {
     if (this.isAudioOn) {
       this.pauseAudio();
     } else {
-      this.renderAudio();
+      this.renderArp();
     }
   }
 
@@ -128,7 +128,7 @@ export class AppComponent implements OnInit {
 
   refreshAudio(): void {
     if (this.isAudioOn) {
-      this.renderAudio();
+      this.renderArp();
     }
   }
 
@@ -140,15 +140,20 @@ export class AppComponent implements OnInit {
     const note = Note.fromName(noteName);
     const freq = el.const({ value: note.freq });
     const volume = el.const({ value: this.volume });
+    // core.render(
+    //   el.mul(volume, el.cycle(freq)),
+    //   el.mul(volume, el.cycle(freq))
+    // );
+    // setTimeout(() => {
+    //   core.render(OFF, OFF);
+    // }, 1000 / (this.tempo / 60));
     core.render(
       el.mul(volume, el.cycle(freq)),
       el.mul(volume, el.cycle(freq))
-    );
-    setTimeout(() => {
-      core.render(OFF, OFF);
-    }, 1000 / (this.tempo / 60));
+    )
   }
 
+  // TODO : handle multiple notes
   toggleStep(step: Step, noteLineName: string): void {
     const namesOfNotesPlayedOnStep = step.notes.map((note) => note.getFullName());
     if (namesOfNotesPlayedOnStep.length === 0) {
@@ -186,24 +191,24 @@ export class AppComponent implements OnInit {
       return step.notes.length > 0 ? step.notes[0].freq : 0; // TODO : handle multiple notes
     });
     if (this.isAudioOn) {
-      this.renderAudio();
+      this.renderArp();
     }
   }
 
-  renderAudio(): void {
+  renderArp(): void {
     const train = el.train(this.fromBpmToHertz(this.tempo));
     const volume = el.const({ value: this.volume });
     core.render(
       el.mul(
         volume,
         el.cycle(
-          el.seq({ seq: this.arp }, train, 0)
+          el.seq2({ seq: this.arp }, train, 0)
         )
       ),
       el.mul(
         volume,
         el.cycle(
-          el.seq({ seq: this.arp }, train, 0)
+          el.seq2({ seq: this.arp }, train, 0)
         )
       )
     );
