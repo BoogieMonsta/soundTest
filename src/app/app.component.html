@@ -15,7 +15,8 @@
 <table>
     <tr *ngFor="let noteName of pianoRoll">
         <td *ngFor="let step of pattern">
-            <div (click)="toggleStep(step, noteName)">{{ displayStep(step, noteName) }}</div>
+            <div (click)="toggleStep(step, noteName)" [style]="{width: '50px', height: '50px'}">{{ displayStep(step,
+                noteName) }}</div>
         </td>
     </tr>
 </table>

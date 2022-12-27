@@ -140,10 +140,14 @@ export class AppComponent implements OnInit {
 
   toggleStep(step: Step, noteLineName: string): void {
     const namesOfNotesPlayedOnStep = step.notes.map((note) => note.getFullName());
-    // TODO : handle multiple notes
-    namesOfNotesPlayedOnStep.includes(noteLineName)
-      ? this.removeNoteFromStep(step, noteLineName)
-      : namesOfNotesPlayedOnStep.length === 0 ? this.addNoteToStep(step, noteLineName) : null;
+    if (namesOfNotesPlayedOnStep.length === 0) {
+      this.addNoteToStep(step, noteLineName);
+    } else if (namesOfNotesPlayedOnStep.includes(noteLineName)) {
+      this.removeNoteFromStep(step, noteLineName);
+    } else {
+      step.notes = [];
+      this.addNoteToStep(step, noteLineName);
+    }
     this.buildArpFromPattern();
   }
 
