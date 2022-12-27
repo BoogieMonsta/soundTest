@@ -115,7 +115,7 @@ export class AppComponent implements OnInit {
   }
 
   reduceTempo(): void {
-    this.tempo -= 5;
+    this.tempo > 5 ? this.tempo -= 5 : this.tempo = 1;
     this.refreshTempo();
   }
 
