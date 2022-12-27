@@ -35,7 +35,7 @@ const B4 = 493.88;
 })
 export class AppComponent implements OnInit {
 
-  @ViewChild('volume') volume!: ElementRef;
+  volume = 0.5;
 
   title = 'seqTest';
 
@@ -129,8 +129,6 @@ export class AppComponent implements OnInit {
   refreshAudio(): void {
     if (this.isAudioOn) {
       this.renderAudio();
-      console.log('audio refreshed');
-
     }
   }
 
@@ -176,7 +174,7 @@ export class AppComponent implements OnInit {
 
   renderAudio(): void {
     const train = el.train(this.fromBpmToHertz(this.tempo));
-    const volume = el.const({ value: Number(this.volume.nativeElement.value) });
+    const volume = el.const({ value: this.volume });
     core.render(
       el.mul(
         volume,

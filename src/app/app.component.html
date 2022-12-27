@@ -10,8 +10,8 @@
 <br>
 <button (click)="togglePlayPause()"> ON/OFF </button>
 <label for="volume-slider"> volume </label>
-<input #volume id="volume-slider" type="range" min=0 max=1 value=0.5 step=0.01 (change)="refreshAudio()">
-<span>{{ volume.valueAsNumber * 100 + '%' }}</span>
+<input #volumeSlider id="volume-slider" [(ngModel)]="volume" type="range" min=0 max=1 step=0.01 (change)="refreshAudio()">
+<span>{{ volumeSlider.valueAsNumber * 100 + '%' }}</span>
 <table>
     <tr *ngFor="let noteName of pianoRoll">
         <td *ngFor="let step of pattern">
