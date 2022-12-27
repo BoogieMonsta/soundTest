@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { el } from '@elemaudio/core';
 import WebAudioRenderer from '@elemaudio/web-renderer';
 import { Note } from './models/Note';
@@ -34,6 +34,8 @@ const B4 = 493.88;
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
+
+  @ViewChild('volume') volume!: ElementRef;
 
   title = 'seqTest';
 
@@ -100,7 +102,7 @@ export class AppComponent implements OnInit {
     if (this.isAudioOn) {
       this.pauseAudio();
     } else {
-      this.playSound();
+      this.renderAudio();
     }
   }
 
@@ -111,22 +113,24 @@ export class AppComponent implements OnInit {
 
   resetTempo(): void {
     this.tempo = 178;
-    this.refreshTempo();
+    this.refreshAudio();
   }
 
   reduceTempo(): void {
     this.tempo > 5 ? this.tempo -= 5 : this.tempo = 1;
-    this.refreshTempo();
+    this.refreshAudio();
   }
 
   increaseTempo(): void {
     this.tempo += 5;
-    this.refreshTempo();
+    this.refreshAudio();
   }
 
-  refreshTempo(): void {
+  refreshAudio(): void {
     if (this.isAudioOn) {
-      this.playSound();
+      this.renderAudio();
+      console.log('audio refreshed');
+
     }
   }
 
@@ -162,20 +166,26 @@ export class AppComponent implements OnInit {
       return step.notes.length > 0 ? step.notes[0].freq : 0; // TODO : handle multiple notes
     });
     if (this.isAudioOn) {
-      this.playSound();
+      this.renderAudio();
     }
   }
 
-  playSound(): void {
+  renderAudio(): void {
     const train = el.train(this.fromBpmToHertz(this.tempo));
-
+    const volume = el.const({ value: Number(this.volume.nativeElement.value) });
     core.render(
-      el.cycle(
-        el.seq({ seq: this.arp }, train, 0)
+      el.mul(
+        volume,
+        el.cycle(
+          el.seq({ seq: this.arp }, train, 0)
+        )
       ),
-      el.cycle(
-        el.seq({ seq: this.arp }, train, 0)
-      ),
+      el.mul(
+        volume,
+        el.cycle(
+          el.seq({ seq: this.arp }, train, 0)
+        )
+      )
     );
     this.isAudioOn = true;
   }
