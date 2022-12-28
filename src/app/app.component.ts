@@ -135,7 +135,9 @@ export class AppComponent implements OnInit {
       step.notes = [];
       this.addNoteToStep(step, noteLineName);
     }
-    this.buildArpFromPattern();
+    if (this.isArpPlaying) {
+      this.buildArpFromPattern();
+    }
   }
 
   removeNoteFromStep(step: Step, noteLineName: string): void {
