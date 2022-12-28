@@ -2,16 +2,16 @@
 <p>Template for an audio web application powered by Elementary Audio and Angular</p>
 <div>
     <label for="tempo-input"> Tempo </label>
-    <input id="tempo-input" type="number" [(ngModel)]="tempo" (ngModelChange)="refreshAudio()">
+    <input id="tempo-input" type="number" [(ngModel)]="tempo" (ngModelChange)="renderArp()">
     <button (click)="reduceTempo()"> - </button>
     <button (click)="increaseTempo()"> + </button>
     <button (click)="resetTempo()"> reset </button>
 </div>
 <br>
-<button (click)="togglePlayPause()"> ON/OFF </button>
+<button (click)="toggleSoundOnOff()"> ON/OFF </button>
 <label for="volume-slider"> volume </label>
 <input #volumeSlider id="volume-slider" [(ngModel)]="volume" type="range" min=0 max=1 step=0.01
-    (change)="refreshAudio()">
+    (change)="renderArp()">
 <span>{{ displayVolume() }}</span>
 <table>
     <tr *ngFor="let noteName of pianoRoll">

@@ -10,24 +10,6 @@ let ctx = new AudioContext();
 
 const OFF = el.const({ value: 0 });
 
-const C4 = 261.63;
-const C4s = 277.18;
-const D4b = 277.18;
-const D4 = 293.66;
-const D4s = 311.13;
-const E4b = 311.13;
-const E4 = 329.63;
-const F4 = 349.23;
-const F4s = 369.99;
-const G4b = 369.99;
-const G4 = 392.00;
-const G4s = 415.30;
-const A4b = 415.30;
-const A4 = 440.00;
-const A4s = 466.16;
-const B4b = 466.16;
-const B4 = 493.88;
-
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -41,8 +23,8 @@ export class AppComponent implements OnInit {
 
   pianoRoll = Object.values(NoteNames);
 
-  isAudioOn = false;
   tempo = 178;
+  isArpPlaying = false;
   pattern: Step[] = [
     {
       seqIdx: 1,
@@ -97,39 +79,32 @@ export class AppComponent implements OnInit {
     node.connect(ctx.destination);
   };
 
-  togglePlayPause(): void {
-    ctx.resume();
-    if (this.isAudioOn) {
-      this.pauseAudio();
+  async toggleSoundOnOff(): Promise<void> {
+    if (ctx.state !== 'running') {
+      await ctx.resume();
     } else {
-      this.renderArp();
+      await ctx.suspend();
     }
   }
 
   pauseAudio(): void {
     core.render(OFF, OFF);
-    this.isAudioOn = false;
+    this.isArpPlaying = false;
   }
 
   resetTempo(): void {
     this.tempo = 178;
-    this.refreshAudio();
+    this.renderArp();
   }
 
   reduceTempo(): void {
     this.tempo > 5 ? this.tempo -= 5 : this.tempo = 1;
-    this.refreshAudio();
+    this.renderArp();
   }
 
   increaseTempo(): void {
     this.tempo += 5;
-    this.refreshAudio();
-  }
-
-  refreshAudio(): void {
-    if (this.isAudioOn) {
-      this.renderArp();
-    }
+    this.renderArp();
   }
 
   fromBpmToHertz(bpm: number): any {
@@ -143,12 +118,13 @@ export class AppComponent implements OnInit {
     core.render(
       el.mul(volume, el.cycle(freq)),
       el.mul(volume, el.cycle(freq))
-    )
+    );
   }
 
   // TODO : handle multiple notes
-  toggleStep(step: Step, noteLineName: string): void {
-    ctx.resume();
+  async toggleStep(step: Step, noteLineName: string): Promise<void> {
+    await ctx.resume();
+
     const namesOfNotesPlayedOnStep = step.notes.map((note) => note.getFullName());
     if (namesOfNotesPlayedOnStep.length === 0) {
       this.playNote(noteLineName);
@@ -184,14 +160,18 @@ export class AppComponent implements OnInit {
     this.arp = this.pattern.map((step) => {
       return step.notes.length > 0 ? step.notes[0].freq : 0; // TODO : handle multiple notes
     });
-    if (this.isAudioOn) {
+    if (!this.isArpPlaying) {
       this.renderArp();
     }
   }
 
   @HostListener('window:keydown.space', ['$event'])
-  handleKeyDown() {
-    this.togglePlayPause();
+  handleKeyDown(): boolean {
+    if (!this.isArpPlaying) {
+      this.buildArpFromPattern();
+    } else {
+      this.pauseAudio();
+    }
     return false; // prevent default
   }
 
@@ -212,7 +192,7 @@ export class AppComponent implements OnInit {
         )
       )
     );
-    this.isAudioOn = true;
+    this.isArpPlaying = true;
   }
 }
 
