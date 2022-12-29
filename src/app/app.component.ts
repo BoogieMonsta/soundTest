@@ -151,7 +151,7 @@ export class AppComponent implements OnInit {
   displayStep(step: Step, noteLineName: string): string {
     const namesOfNotesPlayedOnStep = step.notes.map((note) => note.getFullName());
     const isNoteOnThisLine = namesOfNotesPlayedOnStep.includes(noteLineName);
-    return isNoteOnThisLine ? step.notes[0].getFullName() : '-'; // TODO : handle multiple notes
+    return isNoteOnThisLine ? step.notes[0].getFullName() : ''; // TODO : handle multiple notes
   }
 
   displayVolume(): string {
