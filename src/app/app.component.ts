@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
+import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { el } from '@elemaudio/core';
 import WebAudioRenderer from '@elemaudio/web-renderer';
 import { Note } from './models/Note';
@@ -6,84 +6,64 @@ import { NoteNames } from './models/NoteName';
 import { Step } from './models/Step';
 
 const core = new WebAudioRenderer();
-let ctx = new AudioContext();
 
 const OFF = el.const({ value: 0 });
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements OnInit {
+
+  ctx = new AudioContext();
 
   volume = 0.5;
 
   title = 'seqTest';
 
   pianoRoll = Object.values(NoteNames);
+  showNoteNames = false;
+  notesPerBeat = 4;
 
-  tempo = 178;
+  tempo = 89;
   isArpPlaying = false;
-  pattern: Step[] = [
-    {
-      seqIdx: 1,
-      notes: [],
-    },
-    {
-      seqIdx: 2,
-      notes: [],
-    },
-    {
-      seqIdx: 3,
-      notes: [],
-    },
-    {
-      seqIdx: 4,
-      notes: [],
-    },
-    {
-      seqIdx: 5,
-      notes: [],
-    },
-    {
-      seqIdx: 6,
-      notes: [],
-    },
-    {
-      seqIdx: 7,
-      notes: [],
-    },
-    {
-      seqIdx: 8,
-      notes: [],
-    },
-  ];
-  arp = [0, 0, 0, 0, 0, 0, 0, 0];
+  pattern: Step[] = [];
+  patternLength: number = 16;
+  arp: number[] = []; // initialize first empty, then with 16 steps
 
   async ngOnInit() {
+    // initialize the audio core
     core.on('load', () => {
       core.on('error', (e: any) => {
         console.log(e);
       });
     });
     await this.main();
+
+    // initialize the pattern
+    for (let i = 0; i < this.patternLength; i++) {
+      this.pattern.push({
+        notes: [],
+        seqIdx: i,
+      } as Step);
+    }
   }
 
   private async main() {
-    let node = await core.initialize(ctx, {
+    let node = await core.initialize(this.ctx, {
       numberOfInputs: 0,
       numberOfOutputs: 1,
       outputChannelCount: [2],
     });
-    node.connect(ctx.destination);
+    node.connect(this.ctx.destination);
   };
 
   async toggleSoundOnOff(): Promise<void> {
-    if (ctx.state !== 'running') {
-      await ctx.resume();
+    if (this.ctx.state !== 'running') {
+      await this.ctx.resume();
     } else {
-      await ctx.suspend();
+      await this.ctx.suspend();
     }
   }
 
@@ -93,22 +73,23 @@ export class AppComponent implements OnInit {
   }
 
   resetTempo(): void {
-    this.tempo = 178;
+    this.tempo = 89;
     this.renderArp();
   }
 
   reduceTempo(): void {
-    this.tempo > 5 ? this.tempo -= 5 : this.tempo = 1;
+    this.tempo > 1 ? this.tempo -= 1 : this.tempo = 1;
     this.renderArp();
   }
 
   increaseTempo(): void {
-    this.tempo += 5;
+    this.tempo += 1;
     this.renderArp();
   }
 
   fromBpmToHertz(bpm: number): any {
-    return el.const({ value: 2 * bpm / 60 });
+    // TODO let user choose notes per beat
+    return el.const({ value: this.notesPerBeat * bpm / 60 });
   }
 
   playNote(noteName: string): void {
@@ -123,7 +104,7 @@ export class AppComponent implements OnInit {
 
   // TODO : handle multiple notes
   async toggleStep(step: Step, noteLineName: string): Promise<void> {
-    await ctx.resume();
+    await this.ctx.resume();
 
     const namesOfNotesPlayedOnStep = step.notes.map((note) => note.getFullName());
     if (namesOfNotesPlayedOnStep.length === 0) {
@@ -148,10 +129,9 @@ export class AppComponent implements OnInit {
     step.notes.push(Note.fromName(noteLineName));
   }
 
-  displayStep(step: Step, noteLineName: string): string {
+  isNoteOnStep(step: Step, noteLineName: string): boolean {
     const namesOfNotesPlayedOnStep = step.notes.map((note) => note.getFullName());
-    const isNoteOnThisLine = namesOfNotesPlayedOnStep.includes(noteLineName);
-    return isNoteOnThisLine ? step.notes[0].getFullName() : ''; // TODO : handle multiple notes
+    return namesOfNotesPlayedOnStep.includes(noteLineName); // TODO : handle multiple notes
   }
 
   displayVolume(): string {
@@ -164,6 +144,15 @@ export class AppComponent implements OnInit {
     });
     if (!this.isArpPlaying) {
       this.renderArp();
+    }
+  }
+
+  clearAllSteps(): void {
+    this.pattern.forEach((step) => {
+      step.notes = [];
+    });
+    if (this.isArpPlaying) {
+      this.buildArpFromPattern();
     }
   }
 

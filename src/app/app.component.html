@@ -1,41 +1,85 @@
-<div class="flex flex-col">
+<div class="flex flex-col bg-gray-100">
     <!-- Top panel -->
-    <div class="fixed w-screen">
+    <div class="fixed w-screen drop-shadow-md">
         <!-- Header -->
-        <div class="bg-gray-200 px-5 py-3 flex flex-row justify-between">
+        <div class="bg-gray-200 px-5 flex flex-row justify-between">
             <div class="flex flex-row items-center gap-5">
-                <div class="text-2xl">SequenTest</div>
-                <div>Template for an audio sequencer as a web application
-                    powered by Elementary Audio and Angular</div>
+                <div class="text-2xl ml-2 font-bebas-neue">SeaquinSir</div>
+                <caption class="hidden">Template for an audio sequencer as a web application
+                    powered by Elementary Audio and Angular</caption>
             </div>
-            <div>
-                <button (click)="toggleSoundOnOff()"> ON/OFF </button>
+            <div class="flex flex-row justify-evenly bg-gray-200">
+                <!-- Tempo -->
+                <div class="mx-10 my-3">
+                    <label for="tempo-input" class="font-bebas-neue mr-2"> Tempo </label>
+                    <input id="tempo-input" type="number" [(ngModel)]="tempo" (ngModelChange)="renderArp()">
+                    <button (click)="reduceTempo()"> - </button>
+                    <button (click)="increaseTempo()"> + </button>
+                    <button class="font-bebas-neue" (click)="resetTempo()"> reset </button>
+                </div>
+                <!-- Volume -->
+                <div class="flex flex-row items-center gap-2 mx-10 my-3">
+                    <label for="volume-slider" class="font-bebas-neue"> Volume </label>
+                    <input #volumeSlider id="volume-slider" [(ngModel)]="volume" type="range" min=0 max=1 step=0.01
+                        (change)="renderArp()">
+                    <span>{{ displayVolume() }}</span>
+                </div>
+            </div>
+            <!-- Power On/Off -->
+            <div class="flex flex-row items-center">
+                <button class="bg-gray-300 flex items-center" (click)="toggleSoundOnOff()">
+                    <div [ngClass]="{'bg-gray-500': ctx.state !== 'running', 'bg-green-500': ctx.state === 'running'}"
+                        class="rounded-full w-3 h-3 mr-2 transition-all"></div>
+                    <div class="font-bold"> ON/OFF </div>
+                </button>
             </div>
         </div>
-        <!-- Toolbar -->
-        <div class="flex flex-row justify-evenly bg-gray-100">
-            <div class="mx-10 my-3">
-                <label for="tempo-input"> Tempo </label>
-                <input id="tempo-input" type="number" [(ngModel)]="tempo" (ngModelChange)="renderArp()">
-                <button (click)="reduceTempo()"> - </button>
-                <button (click)="increaseTempo()"> + </button>
-                <button (click)="resetTempo()"> reset </button>
-            </div>
-            <div class="flex flex-row items-center gap-2 mx-10 my-3">
-                <label for="volume-slider"> volume </label>
-                <input #volumeSlider id="volume-slider" [(ngModel)]="volume" type="range" min=0 max=1 step=0.01
-                    (change)="renderArp()">
-                <span>{{ displayVolume() }}</span>
-            </div>
+    </div>
+    <div class="mt-20 p-10 fixed flex flex-col items-start gap-2">
+        <!-- Show/Hide notes -->
+        <div>
+            <button class="font-bebas-neue" (click)="showNoteNames = !showNoteNames">
+                Show/Hide notes
+            </button>
+        </div>
+        <!-- Select note division value -->
+        <div class="bg-gray-200 py-2 px-4 rounded-full">
+            <label for="note-division" class="font-bebas-neue "> Note Division </label>
+            <select class="font-bebas-neue left-10 rounded" [(ngModel)]="notesPerBeat" name="noteDivision"
+                (change)="isArpPlaying ? renderArp() : null" id="note-division">
+                <option value=1>1/1</option>
+                <option value=2>1/2</option>
+                <option value=4>1/4</option>
+                <option value=8>1/8</option>
+                <option value=16>1/16</option>
+                <option value=32>1/32</option>
+            </select>
+        </div>
+        <!-- Clear all steps -->
+        <div>
+            <button class="font-bebas-neue" (click)="clearAllSteps()">
+                Clear all steps
+            </button>
         </div>
     </div>
     <!-- Piano roll -->
     <div class="mt-[135px] m-auto">
-        <table>
+        <table class="flex flex-col-reverse">
             <tr *ngFor="let noteName of pianoRoll">
                 <td *ngFor="let step of pattern">
-                    <div class="w-10 h-10 flex items-center justify-center bg-blue-500" (mousedown)="toggleStep(step, noteName)" (mouseup)="isArpPlaying? renderArp() : pauseAudio()">
-                        <div class="text-white">{{ displayStep(step, noteName) }}</div>
+                    <div [ngClass]="{
+                        'bg-gray-400': noteName.length > 2 && !isNoteOnStep(step, noteName),
+                        'bg-gray-200': noteName.length < 3,
+                        'hover:bg-gray-500': !isNoteOnStep(step, noteName),
+                        'bg-green-400': isNoteOnStep(step, noteName)}"
+                        class="group w-10 h-10 flex items-center justify-center rounded transition-all"
+                        (mousedown)="toggleStep(step, noteName)" (mouseup)="isArpPlaying? renderArp() : pauseAudio()">
+                        <div class="font-bold text-gray-300 tracking-wide opacity-0 group-hover:opacity-100 transition-all"
+                            [ngClass]="{
+                                'text-green-600': isNoteOnStep(step, noteName),
+                                'opacity-100': isNoteOnStep(step, noteName) && showNoteNames}">
+                            {{ noteName }}
+                        </div>
                     </div>
                 </td>
             </tr>
