@@ -1,8 +1,8 @@
-import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, HostListener, OnInit } from '@angular/core';
 import { el } from '@elemaudio/core';
 import WebAudioRenderer from '@elemaudio/web-renderer';
 import { Note } from './models/Note';
-import { NoteNames } from './models/NoteName';
+import { NoteNames } from './models/NoteNames';
 import { Step } from './models/Step';
 
 const core = new WebAudioRenderer();
@@ -14,7 +14,7 @@ const OFF = el.const({ value: 0 });
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, AfterViewInit {
 
   ctx = new AudioContext();
 
@@ -22,7 +22,7 @@ export class AppComponent implements OnInit {
 
   title = 'seqTest';
 
-  pianoRoll = Object.values(NoteNames);
+  pianoRoll = Object.values(NoteNames) as string[];
   showNoteNames = false;
   notesPerBeat = 4;
 
@@ -30,16 +30,16 @@ export class AppComponent implements OnInit {
   isArpPlaying = false;
   pattern: Step[] = [];
   patternLength: number = 16;
-  arp: number[] = []; // initialize first empty, then with 16 steps
+  arp: number[] = [];
 
-  async ngOnInit() {
+  ngOnInit() {
     // initialize the audio core
     core.on('load', () => {
       core.on('error', (e: any) => {
         console.log(e);
       });
     });
-    await this.main();
+    this.main();
 
     // initialize the pattern
     for (let i = 0; i < this.patternLength; i++) {
@@ -48,6 +48,10 @@ export class AppComponent implements OnInit {
         seqIdx: i,
       } as Step);
     }
+  }
+
+  ngAfterViewInit(): void {
+    this.rollPianoHome();
   }
 
   private async main() {
@@ -88,7 +92,6 @@ export class AppComponent implements OnInit {
   }
 
   fromBpmToHertz(bpm: number): any {
-    // TODO let user choose notes per beat
     return el.const({ value: this.notesPerBeat * bpm / 60 });
   }
 
@@ -132,6 +135,10 @@ export class AppComponent implements OnInit {
   isNoteOnStep(step: Step, noteLineName: string): boolean {
     const namesOfNotesPlayedOnStep = step.notes.map((note) => note.getFullName());
     return namesOfNotesPlayedOnStep.includes(noteLineName); // TODO : handle multiple notes
+  }
+
+  rollPianoHome(): void {
+    (document.getElementById(NoteNames.A4) as HTMLElement).scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" });
   }
 
   displayVolume(): string {

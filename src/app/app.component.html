@@ -2,50 +2,54 @@
     <!-- Top panel -->
     <div class="fixed w-screen drop-shadow-md">
         <!-- Header -->
-        <div class="bg-gray-200 px-5 flex flex-row justify-between">
+        <div class="flex flex-row justify-between px-5 bg-gray-200">
             <div class="flex flex-row items-center gap-5">
-                <div class="text-2xl ml-2 font-bebas-neue">SeaquinSir</div>
+                <div class="ml-2 text-2xl font-bebas-neue">Sequins</div>
                 <caption class="hidden">Template for an audio sequencer as a web application
                     powered by Elementary Audio and Angular</caption>
             </div>
-            <div class="flex flex-row justify-evenly bg-gray-200">
+            <div class="flex flex-row items-center bg-gray-200 justify-evenly">
                 <!-- Tempo -->
                 <div class="mx-10 my-3">
-                    <label for="tempo-input" class="font-bebas-neue mr-2"> Tempo </label>
+                    <label for="tempo-input" class="mr-2"> Tempo </label>
                     <input id="tempo-input" type="number" [(ngModel)]="tempo" (ngModelChange)="renderArp()">
-                    <button (click)="reduceTempo()"> - </button>
-                    <button (click)="increaseTempo()"> + </button>
-                    <button class="font-bebas-neue" (click)="resetTempo()"> reset </button>
+                    <button class="button-toolbar" (click)="reduceTempo()"> - </button>
+                    <button class="button-toolbar" (click)="increaseTempo()"> + </button>
+                    <button class="button-toolbar" (click)="resetTempo()"> reset </button>
                 </div>
                 <!-- Volume -->
                 <div class="flex flex-row items-center gap-2 mx-10 my-3">
-                    <label for="volume-slider" class="font-bebas-neue"> Volume </label>
+                    <label for="volume-slider"> Volume </label>
                     <input #volumeSlider id="volume-slider" [(ngModel)]="volume" type="range" min=0 max=1 step=0.01
                         (change)="renderArp()">
                     <span>{{ displayVolume() }}</span>
                 </div>
+                <!-- Volume Knob -->
+                <div class="w-10 h-10 rounded-full shadow-lg bg-gradient-to-b from-gray-100 to-gray-200">
+                    <div class="sticky w-2 h-2 bg-gray-300 rounded-full shadow-inner top-7"></div>
+                </div>
             </div>
             <!-- Power On/Off -->
             <div class="flex flex-row items-center">
-                <button class="bg-gray-300 flex items-center" (click)="toggleSoundOnOff()">
+                <button class="flex items-center button-toolbar" (click)="toggleSoundOnOff()">
                     <div [ngClass]="{'bg-gray-500': ctx.state !== 'running', 'bg-green-500': ctx.state === 'running'}"
-                        class="rounded-full w-3 h-3 mr-2 transition-all"></div>
-                    <div class="font-bold"> ON/OFF </div>
+                        class="w-3 h-3 mr-2 transition-all rounded-full"></div>
+                    <div> ON/OFF </div>
                 </button>
             </div>
         </div>
     </div>
-    <div class="mt-20 p-10 fixed flex flex-col items-start gap-2">
+    <div class="fixed flex flex-col items-start gap-2 p-10 mt-20">
         <!-- Show/Hide notes -->
         <div>
-            <button class="font-bebas-neue" (click)="showNoteNames = !showNoteNames">
+            <button (click)="showNoteNames = !showNoteNames">
                 Show/Hide notes
             </button>
         </div>
         <!-- Select note division value -->
-        <div class="bg-gray-200 py-2 px-4 rounded-full">
-            <label for="note-division" class="font-bebas-neue "> Note Division </label>
-            <select class="font-bebas-neue left-10 rounded" [(ngModel)]="notesPerBeat" name="noteDivision"
+        <div class="px-4 py-2 bg-gray-200 rounded-full drop-shadow-sm bg-gradient-to-b from-white to-gray-100">
+            <label for="note-division"> Note Division: </label>
+            <select class="bg-transparent rounded left-10" [(ngModel)]="notesPerBeat" name="noteDivision"
                 (change)="isArpPlaying ? renderArp() : null" id="note-division">
                 <option value=1>1/1</option>
                 <option value=2>1/2</option>
@@ -57,32 +61,35 @@
         </div>
         <!-- Clear all steps -->
         <div>
-            <button class="font-bebas-neue" (click)="clearAllSteps()">
+            <button (click)="clearAllSteps()">
                 Clear all steps
             </button>
         </div>
     </div>
     <!-- Piano roll -->
-    <div class="mt-[135px] m-auto">
-        <table class="flex flex-col-reverse">
-            <tr *ngFor="let noteName of pianoRoll">
-                <td *ngFor="let step of pattern">
-                    <div [ngClass]="{
-                        'bg-gray-400': noteName.length > 2 && !isNoteOnStep(step, noteName),
-                        'bg-gray-200': noteName.length < 3,
-                        'hover:bg-gray-500': !isNoteOnStep(step, noteName),
-                        'bg-green-400': isNoteOnStep(step, noteName)}"
-                        class="group w-10 h-10 flex items-center justify-center rounded transition-all"
-                        (mousedown)="toggleStep(step, noteName)" (mouseup)="isArpPlaying? renderArp() : pauseAudio()">
-                        <div class="font-bold text-gray-300 tracking-wide opacity-0 group-hover:opacity-100 transition-all"
-                            [ngClass]="{
-                                'text-green-600': isNoteOnStep(step, noteName),
-                                'opacity-100': isNoteOnStep(step, noteName) && showNoteNames}">
-                            {{ noteName }}
+    <div class="m-auto">
+        <table>
+            <div class="flex flex-col-reverse max-h-[100vh] pt-32 pb-16 overflow-y-scroll scrollbar-hide">
+                <tr *ngFor="let noteName of pianoRoll" id="{{noteName}}">
+                    <td *ngFor="let step of pattern">
+                        <div [ngClass]="{
+                            'bg-gray-200': noteName.length < 3,
+                            'bg-gray-300': noteName.length > 2 && !isNoteOnStep(step, noteName),
+                            'hover:bg-gray-400': !isNoteOnStep(step, noteName),
+                            'bg-green-400': isNoteOnStep(step, noteName)}"
+                            class="flex items-center justify-center h-6 transition-all rounded-full shadow-inner group w-14"
+                            (mousedown)="toggleStep(step, noteName)"
+                            (mouseup)="isArpPlaying ? renderArp() : pauseAudio()">
+                            <div class="font-bold tracking-wide text-gray-300 transition-all opacity-0 group-hover:opacity-100"
+                                [ngClass]="{
+                                    'text-green-600': isNoteOnStep(step, noteName),
+                                    'opacity-100': isNoteOnStep(step, noteName) && showNoteNames}">
+                                {{ noteName }}
+                            </div>
                         </div>
-                    </div>
-                </td>
-            </tr>
+                    </td>
+                </tr>
+            </div>
         </table>
     </div>
 </div>

@@ -12,7 +12,7 @@
       @apply text-lg;
     }
     button {
-      @apply bg-gray-200 hover:bg-gray-300 text-gray-400 py-2 px-4 rounded-full w-fit;
+      @apply hover:bg-gray-300 text-gray-400 py-2 px-4 rounded-full w-fit drop-shadow-sm bg-gradient-to-b from-white to-gray-100;
     }
     h1, h2, h3, h4, h5, h6, p, a, input, label, span, div {
       @apply text-gray-400;
@@ -22,6 +22,19 @@
     }
     .font-bebas-neue {
       letter-spacing: 0.05rem;
+    }
+    .button-toolbar {
+      @apply bg-gradient-to-b from-gray-100 to-gray-200;
+    }
+
+    /* For Webkit-based browsers (Chrome, Safari and Opera) */
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+    /* For IE, Edge and Firefox */
+    .scrollbar-hide {
+      -ms-overflow-style: none;  /* IE and Edge */
+      scrollbar-width: none;  /* Firefox */
     }
   }
 @tailwind components;
